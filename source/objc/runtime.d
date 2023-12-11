@@ -65,6 +65,7 @@ else
     alias NSInteger = long;
     alias NSUInteger = ulong;
 }
+alias OSStatus = int;
 class NSObject
 {
     static NSObject alloc() @selector("alloc");
