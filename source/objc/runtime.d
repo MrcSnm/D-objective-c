@@ -248,6 +248,7 @@ class NSDictionary
     @selector("valueForKey:")
     NSObject valueForKey(NSString);
 }
+alias NSDictionary_(Key, Value) = NSDictionary;
 
 
 ///A dynamic collection of objects associated with unique keys.
