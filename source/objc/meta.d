@@ -96,7 +96,7 @@ template GetClassSuperChain(Class)
 mixin template ObjcExtend(Classes...)
 {
     import std.traits:ReturnType, Parameters;
-    import objc.meta:isAlias, Super, GetClassSuperChain;
+    import objc.meta:isAlias, Super, GetClassSuperChain, selector;
     extern(D) static alias SuperClass = Classes[0];
 
 
