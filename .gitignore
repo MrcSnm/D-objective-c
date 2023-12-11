@@ -1,0 +1,16 @@
+.dub
+docs.json
+__dummy.html
+docs/
+/objc
+objc.so
+objc.dylib
+objc.dll
+objc.a
+objc.lib
+objc-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

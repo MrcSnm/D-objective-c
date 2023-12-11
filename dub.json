@@ -1,0 +1,8 @@
+{
+	"authors": ["Hipreme"],
+	"copyright": "Copyright © 2023, Hipreme",
+	"description": "Objective-C base for creating D bindings.",
+    "targetType": "staticLibrary",
+	"license": "proprietary",
+	"name": "objc"
+}
