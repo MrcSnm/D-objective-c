@@ -4,5 +4,5 @@
 	"description": "Objective-C base for creating D bindings.",
     "targetType": "staticLibrary",
 	"license": "proprietary",
-	"name": "objc"
+	"name": "objc_meta"
 }
