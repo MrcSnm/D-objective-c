@@ -1,5 +1,5 @@
 module objc.runtime;
-public import objc.meta : selector, ObjectiveC, ObjcExtend;
+public import objc.meta : selector, ObjectiveC, ObjcExtend, instancetype;
 
 
 private bool isValidObjectiveCNumber(T)()
@@ -70,8 +70,8 @@ alias OSStatus = int;
 alias OSType = uint;
 class NSObject
 {
-    static NSObject alloc() @selector("alloc");
-    NSObject initialize() @selector("init");
+    static NSObject alloc() @selector("alloc") @instancetype;
+    NSObject initialize() @selector("init") @instancetype;
     ///Increments the receiver’s reference count.
     NSObject retain() @selector("retain");
     ///Allocates a new instance of the receiving class, sends it an init message, and returns the initialized object.

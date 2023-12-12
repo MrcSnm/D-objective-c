@@ -29,7 +29,7 @@ extern(C)
 struct ObjectiveC;
 struct selector{string sel;}
 alias SEL = void*;
-struct Super;
+struct instancetype;
 struct objc_super
 {
     void* self;
@@ -46,7 +46,10 @@ bool isAliasModule(alias T, string member)()
     return __traits(identifier, __traits(getMember, T, member)) != member;
 }
 
-alias objcFuncT(alias fn) = extern(C) ReturnType!fn function(void* self, SEL, Parameters!fn);
+template objcFuncT(alias fn)
+{
+    alias objcFuncT = extern(C) ReturnType!fn function(void* self, SEL, Parameters!fn);
+}
 
 string _ObjcGetMsgSend(alias Fn, string arg, bool sliceFirst)()
 {
@@ -95,8 +98,8 @@ template GetClassSuperChain(Class)
 
 mixin template ObjcExtend(Classes...)
 {
-    import std.traits:ReturnType, Parameters;
-    import objc.meta:isAlias, Super, selector;
+    import std.traits:ReturnType, Parameters, hasUDA;
+    import objc.meta:isAlias, selector;
     extern(D) static alias SuperClass = Classes[0];
 
 
@@ -106,11 +109,9 @@ mixin template ObjcExtend(Classes...)
         {
             static foreach(ov; __traits(getOverloads, Class, mem))
             {
-                static if(!__traits(isStaticFunction, ov))
-                {
-                    final @selector(__traits(getAttributes, ov)[0].sel) @Super
-                    mixin("@", Class.stringof, " ReturnType!ov ",mem,"(Parameters!ov);");
-                }
+                final @selector(__traits(getAttributes, ov)[0].sel)
+                mixin((__traits(isStaticFunction, ov) ? " static" : ""), 
+                (hasUDA!(ov, instancetype) ? " @instancetype typeof(this) " : " ReturnType!ov "),mem,"(Parameters!ov);");
             }
         }
     }
@@ -148,15 +149,6 @@ mixin template ObjcLink(Class)
                     @selector(__traits(getAttributes, ov)[0].sel)
                     mixin("__gshared SEL ",selToIdent(__traits(getAttributes, ov)[0].sel),";");
                 }
-                // static if(hasUDA!(ov, Super))
-                // {
-                //     pragma(mangle, ov.mangleof)
-                //     mixin("auto ",mixin(_metaGensym!()), " (void* self, Parameters!ov)",
-                //     "{",
-                //     "return (cast(__traits(getAttributes, ov)[2])self).",mem,"(__traits(parameters)[1..$]);",
-                //     "}");
-                // }
-                // else 
                 static if(__traits(isStaticFunction, ov))
                 {
                     pragma(mangle, ov.mangleof)
