@@ -335,6 +335,8 @@ class NSError
     @selector("localizedRecoveryOptions")
     NSArray_!NSString _localizedRecoveryOptions();
 
+    extern(D) final string toString(){return localizedDescription.toString;}
+
     extern(D) final NSArrayD!NSString localizedRecoveryOptions()
     {
         return NSArrayD!NSString(_localizedRecoveryOptions);
