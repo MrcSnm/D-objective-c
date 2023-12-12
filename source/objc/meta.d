@@ -96,16 +96,12 @@ template GetClassSuperChain(Class)
 mixin template ObjcExtend(Classes...)
 {
     import std.traits:ReturnType, Parameters;
-    import objc.meta:isAlias, Super, GetClassSuperChain, selector;
+    import objc.meta:isAlias, Super, selector;
     extern(D) static alias SuperClass = Classes[0];
 
 
     static foreach(Class; Classes) static foreach(mem; __traits(derivedMembers, Class))
     {
-        static foreach(_SuperClass; GetClassSuperChain!Class)
-        {
-            mixin ObjcExtend!(_SuperClass);
-        }
         static if(!isAlias!(Class, mem) && !__traits(hasMember, typeof(this), mem))
         {
             static foreach(ov; __traits(getOverloads, Class, mem))
