@@ -54,6 +54,7 @@ enum NO = false;
 
 ///Type used to represent elapsed time in seconds.
 alias CFTimeInterval = double;
+alias NSTimeInterval = double;
 
 version(watchOS)
 {
