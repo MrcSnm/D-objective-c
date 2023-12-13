@@ -1,5 +1,6 @@
 module objc.runtime;
 public import objc.meta : selector, ObjectiveC, ObjcExtend, instancetype;
+public import objc.clang_block;
 
 
 private bool isValidObjectiveCNumber(T)()
