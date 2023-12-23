@@ -151,7 +151,7 @@ mixin template ObjcLink(Class)
                 }
                 static if(__traits(isStaticFunction, ov))
                 {
-                    pragma(mangle, ov.mangleof)
+                    pragma(mangle, ov.mangleof) extern(C++)
                     mixin("auto ",mixin(_metaGensym!()), " (Parameters!ov)",
                     "{",
                     _ObjcGetMsgSend!(ov, Class.stringof~"_", false),
@@ -159,7 +159,7 @@ mixin template ObjcLink(Class)
                 }
                 else
                 {
-                    pragma(mangle, ov.mangleof)
+                    pragma(mangle, ov.mangleof) extern(C++)
                     mixin("auto ",mixin(_metaGensym!()), " (void* self, Parameters!ov)",
                     "{",
                     _ObjcGetMsgSend!(ov, "self", true),
