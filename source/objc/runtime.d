@@ -153,6 +153,8 @@ class NSString
     extern(D) final string toString() @nogc const
     {
         const(char)* ret = UTF8String();
+        if(ret == null)
+            return null;
         size_t i = 0; while(ret[i++] != '\0'){}
         if(i > 0) return cast(string)ret[0..i-1];
         return null;
@@ -371,6 +373,56 @@ class NSData
 class NSURL
 {
     mixin ObjcExtend!NSObject;
+
+    ///Creates and returns an NSURL object initialized with a provided URL string.
+    @selector("URLWithString:") @instancetype
+    static NSURL URLWithString(NSString);
+
+    @selector("initWithString:") @instancetype
+    ///Initializes an NSURL object with a provided URL string.
+    NSURL initWithString(NSString);
+
+    ///Creates and returns an NSURL object initialized with a base URL and a relative string.
+    @selector("URLWithString:relativeToURL:") @instancetype
+    static NSURL URLWithString(NSString URLString, NSURL relativeToURL);
+
+    ///Initializes an NSURL object with a base URL and a relative string.
+    @selector("initWithString:relativeToURL:") @instancetype 
+    NSURL initWithString(NSString URLString, NSURL relativeToURL);
+
+    ///Initializes and returns a newly created NSURL object as a file URL with a specified path.
+    @selector("fileURLWithPath:isDirectory:")
+    static NSURL *fileURLWithPath(NSString path, BOOL isDirectory);
+
+    ///Initializes a newly created NSURL referencing the local file or directory at path.
+    @selector("initFileURLWithPath:isDirectory:") @instancetype 
+    NSURL initFileURLWithPath(NSString path, BOOL isDirectory);
+
+    @selector("fileURLWithPath:relativeToURL:")
+    static NSURL fileURLWithPath(NSString path, NSURL relativeToURL);
+
+    @selector("initFileURLWithPath:relativeToURL:") @instancetype 
+    NSURL initFileURLWithPath(NSString path,NSURL relativeToURL);
+
+    @selector("fileURLWithPath:isDirectory:relativeToURL:")
+    static NSURL fileURLWithPath(NSString path, BOOL isDirectory, NSURL relativeToURL);
+
+    @selector("initFileURLWithPath:isDirectory:relativeToURL:") @instancetype 
+    NSURL initFileURLWithPath(NSString path, BOOL isDirectory, NSURL relativeToURL);
+
+    ///Initializes and returns a newly created NSURL object as a file URL with a specified path.
+    @selector("fileURLWithPath:")
+    static NSURL fileURLWithPath(NSString);
+
+    ///Initializes a newly created NSURL referencing the local file or directory at path.
+    @selector("initFileURLWithPath:") @instancetype 
+    NSURL initFileURLWithPath(NSString);
+
+
+    ///Initializes and returns a newly created NSURL object as a file URL with specified path components.
+    @selector("fileURLWithPathComponents:")
+    static NSURL fileURLWithPathComponents(NSArray_!NSString components);
+
 
 }
 
