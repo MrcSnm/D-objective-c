@@ -423,6 +423,44 @@ class NSURL
     @selector("fileURLWithPathComponents:")
     static NSURL fileURLWithPathComponents(NSArray_!NSString components);
 
+    ///The URL string for the receiver as an absolute URL. (read-only)
+	@selector("absoluteString")
+	NSString absoluteString();
+
+    ///The path, conforming to RFC 1808. (read-only)
+    @selector("path")
+    NSString path();
+
+    ///An array containing the path components. (read-only)
+    @selector("pathComponents")
+    NSArray_!NSString pathComponents();
+
+    ///The path extension. (read-only)
+    @selector("pathExtension")
+    NSString pathExtension();
+
+    ///The relative path, conforming to RFC 1808. (read-only)
+    @selector("relativePath")
+    NSString relativePath();
+
+    ///A string representation of the relative portion of the URL. (read-only)
+    @selector("relativeString")
+    NSString relativeString();
+
+    ///The scheme. (read-only)
+    @selector("scheme")
+    NSString scheme();
+
+    ///A copy of the URL with any instances of ".." or "." removed from its path. (read-only)
+    @selector("standardizedURL")
+    NSString standardizedURL();
+
+    ///The user name, conforming to RFC 1808.
+    @selector("user")
+    NSString user();
+
+
+
 
 }
 
