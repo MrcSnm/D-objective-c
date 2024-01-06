@@ -46,9 +46,9 @@ bool isAliasModule(alias T, string member)()
     return __traits(identifier, __traits(getMember, T, member)) != member;
 }
 
-template objcFuncT(alias fn)
+template objcFuncT(alias fn, Class)
 {
-    alias objcFuncT = extern(C) ReturnType!fn function(void* self, SEL, Parameters!fn);
+    alias objcFuncT = extern(C) ReturnType!fn function(Class self, SEL, Parameters!fn);
 }
 
 string _ObjcGetMsgSend(alias Fn, string arg, bool sliceFirst)()
@@ -59,7 +59,7 @@ string _ObjcGetMsgSend(alias Fn, string arg, bool sliceFirst)()
     {
         enum send = "objc_msgSend_stret";
         return "ReturnType!ov structReturn;" ~
-        "alias fn = extern(C) void function(void*, void*, SEL, Parameters!ov);"~
+        "alias fn = extern(C) void function(void*, Class, SEL, Parameters!ov);"~
         "(cast(fn)&objc_msgSend_stret)(&structReturn, " ~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");" ~
         "return structReturn;";
     }
@@ -69,7 +69,7 @@ string _ObjcGetMsgSend(alias Fn, string arg, bool sliceFirst)()
         enum send = "objc_msgSend_fpret";
     else
         enum send = "objc_msgSend";
-        return "return (cast(objcFuncT!(ov))&"~send~")("~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");";
+        return "return (cast(objcFuncT!(ov, Class))&"~send~")("~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");";
     }
 }
 
@@ -101,6 +101,9 @@ mixin template ObjcExtend(Classes...)
     import std.traits:ReturnType, Parameters, hasUDA;
     import objc.meta:isAlias, selector;
     extern(D) static alias SuperClass = Classes[0];
+
+    pragma(inline, true) extern(D) Classes[0] toSuperClass(){return cast(Classes[0])this;}
+    alias toSuperClass this;
 
 
     static foreach(Class; Classes) static foreach(mem; __traits(derivedMembers, Class))
@@ -151,16 +154,16 @@ mixin template ObjcLink(Class)
                 }
                 static if(__traits(isStaticFunction, ov))
                 {
-                    pragma(mangle, ov.mangleof) extern(C++)
+                    pragma(mangle, ov.mangleof) extern(C)
                     mixin("auto ",mixin(_metaGensym!()), " (Parameters!ov)",
                     "{",
-                    _ObjcGetMsgSend!(ov, Class.stringof~"_", false),
+                    _ObjcGetMsgSend!(ov, "cast(Class)"~Class.stringof~"_", false),
                     "}");
                 }
                 else
                 {
-                    pragma(mangle, ov.mangleof) extern(C++)
-                    mixin("auto ",mixin(_metaGensym!()), " (void* self, Parameters!ov)",
+                    pragma(mangle, ov.mangleof) extern(C)
+                    mixin("auto ",mixin(_metaGensym!()), " (Class self, Parameters!ov)",
                     "{",
                     _ObjcGetMsgSend!(ov, "self", true),
                     "}");

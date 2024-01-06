@@ -1,7 +1,8 @@
 # D-objective-c
 Repository used to keep a compatible Objective-C bindings generation with D.
 
-## Objective-C strings
+## Objective-C strings
+
 ```d
 NSLog("abcd".ns);
 ```
