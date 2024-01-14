@@ -101,10 +101,7 @@ mixin template ObjcExtend(Classes...)
     import std.traits:ReturnType, Parameters, hasUDA;
     import objc.meta:isAlias, selector;
     extern(D) static alias SuperClass = Classes[0];
-
     pragma(inline, true) extern(D) Classes[0] toSuperClass(){return cast(Classes[0])this;}
-    alias toSuperClass this;
-
 
     static foreach(Class; Classes) static foreach(mem; __traits(derivedMembers, Class))
     {
@@ -118,6 +115,7 @@ mixin template ObjcExtend(Classes...)
             }
         }
     }
+    alias toSuperClass this;
 }
 
 string selToIdent(string sel)
