@@ -4,5 +4,17 @@
 	"description": "Objective-C base for creating D bindings.",
     "targetType": "staticLibrary",
 	"license": "proprietary",
+	"configurations": [
+		{
+			"name": "macOS",
+			"platforms": ["osx"],
+			"lflags": [
+				"-framework", "Foundation",
+				"-lObjC",
+				"-all_load"
+			]
+		},
+		{"name": "test_generation"}
+	],
 	"name": "objc_meta"
 }
