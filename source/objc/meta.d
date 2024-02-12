@@ -1,9 +1,18 @@
 module objc.meta;
 import std.traits;
+
+private
+{
+    version(ARM) enum isARM = true;
+    else version(AArch64) enum isARM = true;
+    else enum isARM = false;
+}
+
 extern(C)
 {
     void objc_msgSend(void* instance, SEL, ...);
-    void objc_msgSend_stret(void* returnObject, void* instance, SEL, ...);
+    static if(!isARM)
+        void objc_msgSend_stret(void* returnObject, void* instance, SEL, ...);
     void objc_msgSend_fpret(void* instance, SEL, ...);
     void objc_msgSendSuper(void* instance, SEL, ...);
     void objc_msgSendSuper_stret(void* returnObject, void* instance, SEL, ...);
@@ -55,7 +64,7 @@ string _ObjcGetMsgSend(alias Fn, string arg, bool sliceFirst)()
 {
     alias RetT = ReturnType!Fn;
     enum ident = selToIdent(__traits(getAttributes, Fn)[0].sel);
-    static if(is(RetT == struct))
+    static if(is(RetT == struct) && !isARM)
     {
         enum send = "objc_msgSend_stret";
         return "ReturnType!ov structReturn;" ~
