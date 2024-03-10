@@ -11,9 +11,10 @@ private
 extern(C)
 {
     void objc_msgSend(void* instance, SEL, ...);
-    static if(!isARM)
+    static if(!isARM) {
         void objc_msgSend_stret(void* returnObject, void* instance, SEL, ...);
-    void objc_msgSend_fpret(void* instance, SEL, ...);
+        void objc_msgSend_fpret(void* instance, SEL, ...);
+    }
     void objc_msgSendSuper(void* instance, SEL, ...);
     void objc_msgSendSuper_stret(void* returnObject, void* instance, SEL, ...);
     void* objc_getClass(const char* name);
@@ -64,19 +65,25 @@ string _ObjcGetMsgSend(alias Fn, string arg, bool sliceFirst)()
 {
     alias RetT = ReturnType!Fn;
     enum ident = selToIdent(__traits(getAttributes, Fn)[0].sel);
-    static if(is(RetT == struct) && !isARM)
+    static if(!isARM)
     {
-        enum send = "objc_msgSend_stret";
-        return "ReturnType!ov structReturn;" ~
-        "alias fn = extern(C) void function(void*, Class, SEL, Parameters!ov);"~
-        "(cast(fn)&objc_msgSend_stret)(&structReturn, " ~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");" ~
-        "return structReturn;";
+        static if(is(RetT == struct))
+        {
+            enum send = "objc_msgSend_stret";
+            return "ReturnType!ov structReturn;" ~
+            "alias fn = extern(C) void function(void*, Class, SEL, Parameters!ov);"~
+            "(cast(fn)&objc_msgSend_stret)(&structReturn, " ~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");" ~
+            "return structReturn;";
+        }
+        else
+        {
+            static if(__traits(isFloating, RetT))
+            enum send = "objc_msgSend_fpret";
+            return "return (cast(objcFuncT!(ov, Class))&"~send~")("~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");";
+        }
     }
     else
     {
-        static if(__traits(isFloating, RetT))
-        enum send = "objc_msgSend_fpret";
-    else
         enum send = "objc_msgSend";
         return "return (cast(objcFuncT!(ov, Class))&"~send~")("~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");";
     }
