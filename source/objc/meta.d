@@ -78,14 +78,15 @@ string _ObjcGetMsgSend(alias Fn, string arg, bool sliceFirst)()
         else
         {
             static if(__traits(isFloating, RetT))
-            enum send = "objc_msgSend_fpret";
+                enum send = "objc_msgSend_fpret";
+            else 
+                enum send = "objc_msgSend";
             return "return (cast(objcFuncT!(ov, Class))&"~send~")("~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");";
         }
     }
     else
     {
-        enum send = "objc_msgSend";
-        return "return (cast(objcFuncT!(ov, Class))&"~send~")("~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");";
+        return "return (cast(objcFuncT!(ov, Class))&objc_msgSend)("~arg~", "~ident~", __traits(parameters)"~(sliceFirst ? "[1..$]" : "")~");";
     }
 }
 
