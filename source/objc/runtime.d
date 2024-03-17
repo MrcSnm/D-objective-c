@@ -21,13 +21,19 @@ private bool isValidObjectiveCNumber(T)()
     - identity (used on any object that extends NSObject will return itself)
 */
 
-NSString ns(string str)
-{
-    import core.memory;
-    str~= '\0';
-    // scope(exit) GC.free(cast(void*)str.ptr);
-    return NSString.alloc.initWithUTF8String(str.ptr);
+NSString ns(string istr) nothrow @nogc {
+    import core.stdc.stdlib : malloc, free;
+
+    char* str = cast(char*)malloc(istr.length+1);
+    str[0..istr.length] = istr[0..$];
+    str[istr.length] = '\0';
+
+    NSString out_ = NSString.alloc.initWithUTF8String(str);
+    free(str);
+
+    return out_;
 }
+
 ///Identity. Always return the object itself if it inherits from NSObject
 T ns(T)(T value) if(is(T : NSObject)){return value;}
 
@@ -48,6 +54,7 @@ To nscast(To, From)(From arg)
 
 
 @ObjectiveC final extern(C++):
+@nogc nothrow:
 
 alias BOOL = bool;
 enum YES = true;
@@ -71,6 +78,7 @@ alias OSStatus = int;
 alias OSType = uint;
 class NSObject
 {
+@nogc nothrow:
     static NSObject alloc() @selector("alloc") @instancetype;
     NSObject initialize() @selector("init") @instancetype;
     ///Increments the receiver’s reference count.
@@ -89,12 +97,14 @@ class NSObject
 ///A simple container for a single C or Objective-C data item.
 class NSValue
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
 }
 
 ///An object wrapper for primitive scalar numeric values.
 class NSNumber
 {
+@nogc nothrow:
     mixin ObjcExtend!NSValue;
     @selector("numberWithBool:") static NSNumber opCall(BOOL);
     @selector("numberWithChar:") static NSNumber opCall(byte);
@@ -131,6 +141,7 @@ extern(C) void NSLog(NSString str, ...);
 
 class NSString
 {
+@nogc nothrow:
     static NSString alloc() @selector("alloc");
     NSString initWithUTF8String(const(char)* str) @selector("initWithUTF8String:");
 
@@ -163,6 +174,7 @@ class NSString
 
 class NSArray
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
     NSArray init() @selector("init");
     ///Creates and returns an empty array.
@@ -202,17 +214,20 @@ extern(D) struct NSArrayD(T)
     NSArray arr = void;
     alias arr this;
 
+    @nogc nothrow
     auto opAssign(NSArray arr)
     {
         this.arr = arr;
         return this;
     }
 
+    @nogc nothrow
     extern(D) pragma(inline, true) T opIndex(size_t index)
     {
         return cast(T)cast(void*)arr.objectAtIndex(index);
     }
-    extern(D) final int opApply(scope int delegate(T) dg)
+
+    extern(D) int opApply(scope int delegate(T) dg)
     {
         int result = 0;
         NSUInteger l = arr.count;
@@ -229,6 +244,7 @@ extern(D) struct NSArrayD(T)
 
 class NSDictionary
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
     ///Creates an empty dictionary.
     @selector("dictionary")
@@ -260,6 +276,7 @@ alias NSDictionary_(Key, Value) = NSDictionary;
 ///A dynamic collection of objects associated with unique keys.
 class NSMutableDictionary
 {
+@nogc nothrow:
     mixin ObjcExtend!NSDictionary;
     @selector("dictionary")
     static NSMutableDictionary dictionary();
@@ -277,15 +294,15 @@ class NSMutableDictionary
     void setValue(NSObject, NSString);
 }
 
-extern(D) struct NSMutableDictionaryD(Key, Value)
-{
+extern(D) struct NSMutableDictionaryD(Key, Value) {
+@nogc nothrow:
     static if(isValidObjectiveCNumber!Value)
         alias RealValue = NSNumber;
     else static if(is(Value == string))
         alias RealValue = NSString;
     else
     {
-        static assert(is(Value : NSObject), "Unknown object of type ", Value, " receive");
+        static assert(is(Value : NSObject), "Unknown object of type " ~ Value.stringof ~ " received.");
         alias RealValue = Value;
     }
 
@@ -321,6 +338,7 @@ alias NSErrorDomain = NSString;
 
 class NSError
 {
+@nogc nothrow:
     ///The error code
     @selector("code")
     NSInteger code();
@@ -366,12 +384,14 @@ struct NSRange
 }
 class NSData
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
 }
 
 ///An object that represents the location of a resource, such as an item on a remote server or the path to a local file.
 class NSURL
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
 
     ///Creates and returns an NSURL object initialized with a provided URL string.
@@ -467,6 +487,7 @@ class NSURL
 ///This defines the structure used as contextual information in the NSFastEnumeration protocol.
 struct NSFastEnumerationState
 {
+@nogc nothrow:
     import core.stdc.config;
     ///A C array that you can use to hold returned values.
     c_ulong[5] extra;
@@ -480,6 +501,7 @@ struct NSFastEnumerationState
 ///A protocol that objects adopt to support fast enumeration.
 interface NSFastEnumeration
 {
+@nogc nothrow:
     ///Returns by reference a C array of objects over which the sender should iterate, and as the return value the number of objects in the array.
     @selector("countByEnumeratingWithState:objects:count:")
     NSUInteger countByEnumeratingWithState(NSFastEnumerationState* state, void* objects, NSUInteger count);

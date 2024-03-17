@@ -92,6 +92,7 @@
 module objc.clang_block;
 
 import core.stdc.config;
+@nogc nothrow:
 
 /**
  * This struct is the D representation of a Clang Block.
@@ -102,6 +103,7 @@ import core.stdc.config;
  */
 struct Block(R = void, Params...)
 {
+@nogc nothrow:
 private:
 
     alias extern(C) R function(Block*, Params) Invoke;
@@ -113,9 +115,9 @@ private:
     Descriptor* descriptor;
 
     // Imported variables go here
-    R delegate(Params) dg;
+    R delegate(Params) @nogc nothrow dg;
 
-    this(void* isa, int flags, Invoke invoke, R delegate(Params) dg)
+    this(void* isa, int flags, Invoke invoke, R delegate(Params) @nogc nothrow dg)
     {
         this.isa = isa;
         this.flags = flags;
