@@ -1,6 +1,7 @@
 module objc.runtime;
 public import objc.meta : selector, ObjectiveC, ObjcExtend, instancetype;
 public import objc.clang_block;
+@nogc nothrow:
 
 
 private bool isValidObjectiveCNumber(T)()
@@ -71,6 +72,7 @@ alias OSStatus = int;
 alias OSType = uint;
 class NSObject
 {
+@nogc nothrow:
     static NSObject alloc() @selector("alloc") @instancetype;
     NSObject initialize() @selector("init") @instancetype;
     ///Increments the receiver’s reference count.
@@ -89,12 +91,14 @@ class NSObject
 ///A simple container for a single C or Objective-C data item.
 class NSValue
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
 }
 
 ///An object wrapper for primitive scalar numeric values.
 class NSNumber
 {
+@nogc nothrow:
     mixin ObjcExtend!NSValue;
     @selector("numberWithBool:") static NSNumber opCall(BOOL);
     @selector("numberWithChar:") static NSNumber opCall(byte);
@@ -131,6 +135,7 @@ extern(C) void NSLog(NSString str, ...);
 
 class NSString
 {
+@nogc nothrow:
     static NSString alloc() @selector("alloc");
     NSString initWithUTF8String(const(char)* str) @selector("initWithUTF8String:");
 
@@ -163,6 +168,7 @@ class NSString
 
 class NSArray
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
     NSArray init() @selector("init");
     ///Creates and returns an empty array.
@@ -199,6 +205,7 @@ alias NSArray_(T) = NSArray;
 
 extern(D) struct NSArrayD(T)
 {
+@nogc nothrow:
     NSArray arr = void;
     alias arr this;
 
@@ -229,6 +236,7 @@ extern(D) struct NSArrayD(T)
 
 class NSDictionary
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
     ///Creates an empty dictionary.
     @selector("dictionary")
@@ -260,6 +268,7 @@ alias NSDictionary_(Key, Value) = NSDictionary;
 ///A dynamic collection of objects associated with unique keys.
 class NSMutableDictionary
 {
+@nogc nothrow:
     mixin ObjcExtend!NSDictionary;
     @selector("dictionary")
     static NSMutableDictionary dictionary();
@@ -277,18 +286,18 @@ class NSMutableDictionary
     void setValue(NSObject, NSString);
 }
 
-extern(D) struct NSMutableDictionaryD(Key, Value)
-{
+extern(D) struct NSMutableDictionaryD(Key, Value) {
     static if(isValidObjectiveCNumber!Value)
         alias RealValue = NSNumber;
     else static if(is(Value == string))
         alias RealValue = NSString;
     else
     {
-        static assert(is(Value : NSObject), "Unknown object of type ", Value, " receive");
+        static assert(is(Value : NSObject), "Unknown object of type " ~ Value.stringof ~ " received.");
         alias RealValue = Value;
     }
 
+@nogc nothrow:
     NSMutableDictionary dictionary;
     this(NSMutableDictionary d){dictionary = d;}
     this(scope Value[Key] kv)
@@ -321,6 +330,7 @@ alias NSErrorDomain = NSString;
 
 class NSError
 {
+@nogc nothrow:
     ///The error code
     @selector("code")
     NSInteger code();
@@ -366,12 +376,14 @@ struct NSRange
 }
 class NSData
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
 }
 
 ///An object that represents the location of a resource, such as an item on a remote server or the path to a local file.
 class NSURL
 {
+@nogc nothrow:
     mixin ObjcExtend!NSObject;
 
     ///Creates and returns an NSURL object initialized with a provided URL string.
@@ -467,6 +479,7 @@ class NSURL
 ///This defines the structure used as contextual information in the NSFastEnumeration protocol.
 struct NSFastEnumerationState
 {
+@nogc nothrow:
     import core.stdc.config;
     ///A C array that you can use to hold returned values.
     c_ulong[5] extra;
@@ -480,6 +493,7 @@ struct NSFastEnumerationState
 ///A protocol that objects adopt to support fast enumeration.
 interface NSFastEnumeration
 {
+@nogc nothrow:
     ///Returns by reference a C array of objects over which the sender should iterate, and as the return value the number of objects in the array.
     @selector("countByEnumeratingWithState:objects:count:")
     NSUInteger countByEnumeratingWithState(NSFastEnumerationState* state, void* objects, NSUInteger count);

@@ -8,7 +8,7 @@ private
     else enum isARM = false;
 }
 
-extern(C)
+extern(C) @nogc nothrow
 {
     void objc_msgSend(void* instance, SEL, ...);
     static if(!isARM) {
