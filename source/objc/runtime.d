@@ -1,7 +1,6 @@
 module objc.runtime;
 public import objc.meta : selector, ObjectiveC, ObjcExtend, instancetype;
 public import objc.clang_block;
-@nogc nothrow:
 
 
 private bool isValidObjectiveCNumber(T)()
@@ -22,13 +21,19 @@ private bool isValidObjectiveCNumber(T)()
     - identity (used on any object that extends NSObject will return itself)
 */
 
-NSString ns(string str)
-{
-    import core.memory;
-    str~= '\0';
-    // scope(exit) GC.free(cast(void*)str.ptr);
-    return NSString.alloc.initWithUTF8String(str.ptr);
+NSString ns(string istr) nothrow @nogc {
+    import core.stdc.stdlib : malloc, free;
+
+    char* str = cast(char*)malloc(istr.length+1);
+    str[0..istr.length] = istr[0..$];
+    str[istr.length] = '\0';
+
+    NSString out_ = NSString.alloc.initWithUTF8String(str);
+    free(str);
+
+    return out_;
 }
+
 ///Identity. Always return the object itself if it inherits from NSObject
 T ns(T)(T value) if(is(T : NSObject)){return value;}
 
@@ -49,6 +54,7 @@ To nscast(To, From)(From arg)
 
 
 @ObjectiveC final extern(C++):
+@nogc nothrow:
 
 alias BOOL = bool;
 enum YES = true;
@@ -205,21 +211,23 @@ alias NSArray_(T) = NSArray;
 
 extern(D) struct NSArrayD(T)
 {
-@nogc nothrow:
     NSArray arr = void;
     alias arr this;
 
+    @nogc nothrow
     auto opAssign(NSArray arr)
     {
         this.arr = arr;
         return this;
     }
 
+    @nogc nothrow
     extern(D) pragma(inline, true) T opIndex(size_t index)
     {
         return cast(T)cast(void*)arr.objectAtIndex(index);
     }
-    extern(D) final int opApply(scope int delegate(T) dg)
+
+    extern(D) int opApply(scope int delegate(T) dg)
     {
         int result = 0;
         NSUInteger l = arr.count;
@@ -287,6 +295,7 @@ class NSMutableDictionary
 }
 
 extern(D) struct NSMutableDictionaryD(Key, Value) {
+@nogc nothrow:
     static if(isValidObjectiveCNumber!Value)
         alias RealValue = NSNumber;
     else static if(is(Value == string))
@@ -297,7 +306,6 @@ extern(D) struct NSMutableDictionaryD(Key, Value) {
         alias RealValue = Value;
     }
 
-@nogc nothrow:
     NSMutableDictionary dictionary;
     this(NSMutableDictionary d){dictionary = d;}
     this(scope Value[Key] kv)

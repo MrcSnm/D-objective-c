@@ -115,9 +115,9 @@ private:
     Descriptor* descriptor;
 
     // Imported variables go here
-    R delegate(Params) dg;
+    R delegate(Params) @nogc nothrow dg;
 
-    this(void* isa, int flags, Invoke invoke, R delegate(Params) dg)
+    this(void* isa, int flags, Invoke invoke, R delegate(Params) @nogc nothrow dg)
     {
         this.isa = isa;
         this.flags = flags;
